@@ -1,3 +1,4 @@
 /target
 *.txt
 */*.txt
+.DS_Store
