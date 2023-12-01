@@ -96,9 +96,16 @@ pub fn total(time: Duration) {
 
     let color = (ratio * 255.0).min(255.0) as u8;
 
+    let remaining = Duration::from_secs(1) - time;
+
     println!(
         "{: >12} {}",
         "Total".cyan().bold(),
         format!("{:#?}", time).truecolor(color, 255 - color, 0)
+    );
+    println!(
+        "{: >12} {}",
+        "Remaining".cyan().bold(),
+        format!("{:#?}", remaining).truecolor(color, 255 - color, 0)
     );
 }
