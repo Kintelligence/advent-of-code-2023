@@ -1,3 +1,8 @@
+use day_22::*;
+use shared::*;
+extern crate shared;
+
 fn main() {
-    println!("Hello, world!");
+    execute(&part_1, "22.1");
+    execute(&part_2, "22.2");
 }

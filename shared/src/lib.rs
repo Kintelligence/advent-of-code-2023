@@ -1,6 +1,6 @@
 use std::{
     fmt::{Display, Formatter},
-    time::Instant,
+    time::{Duration, Instant},
 };
 
 #[derive(Clone)]
@@ -70,10 +70,35 @@ impl From<&str> for Solution {
     }
 }
 
-pub fn execute(f: &dyn Fn() -> Solution, name: &str) {
+use colored::Colorize;
+
+pub fn execute(f: &dyn Fn() -> Solution, name: &str) -> Duration {
     let start = Instant::now();
     let result = f();
     let time = start.elapsed();
 
-    println!("{: <6} {: >10?} - {}", name, time, result)
+    let ratio = time.as_micros() as f64 / (Duration::from_secs(1) / 50).as_micros() as f64;
+
+    let color = (ratio * 255.0).min(255.0) as u8;
+
+    println!(
+        "{: >12} {:} ({})",
+        String::from(name).cyan().bold(),
+        format!("{}", result).bold(),
+        format!("{:#?}", time).truecolor(color, 255 - color, 0)
+    );
+
+    time
+}
+
+pub fn total(time: Duration) {
+    let ratio = time.as_micros() as f64 / (Duration::from_secs(1)).as_micros() as f64;
+
+    let color = (ratio * 255.0).min(255.0) as u8;
+
+    println!(
+        "{: >12} {}",
+        "Total".cyan().bold(),
+        format!("{:#?}", time).truecolor(color, 255 - color, 0)
+    );
 }
