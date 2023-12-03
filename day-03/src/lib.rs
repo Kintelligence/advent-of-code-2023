@@ -8,33 +8,92 @@ const _PANDA: &'static str = include_str!("_panda.txt");
 const _LONG: &'static str = include_str!("_long.txt");
 
 pub fn part_1() -> Solution {
-    let data: Vec<Vec<char>> = _INPUT.lines().map(|line| line.chars().collect()).collect();
+    let mut previous: [bool; 140] = [false; 140];
+    let mut remaining: Vec<(usize, usize, u32)> = Vec::new();
     let mut sum: u32 = 0;
-    let height = data.len();
-    let width = data[0].len();
 
-    let mut y: usize = 0;
-    for _ in 0..height {
-        let mut x: usize = 0;
-        let mut visited: bool = false;
+    for line in _INPUT.lines() {
+        let mut next_remaining: Vec<(usize, usize, u32)> = Vec::new();
+        let mut current: [bool; 140] = [false; 140];
+        let mut value: u32 = 0;
+        let mut is_adjacent: bool = false;
+        let mut i: usize = 0;
 
-        for _ in 0..width {
-            if data[y][x].is_numeric() {
-                if !visited {
-                    let (value, start, end) = get_number_around(y, x, &data);
-                    if has_symbol_around(y, start, end, &data, height, width) {
-                        sum += value;
+        for char in line.chars() {
+            if char != '.' {
+                if char.is_numeric() {
+                    value *= 10;
+                    value += char.to_digit(10).unwrap();
+
+                    if i > 0 && previous[i - 1] {
+                        is_adjacent = true;
+                    } else if previous[i] {
+                        is_adjacent = true;
+                    } else if i < 139 && previous[i + 1] {
+                        is_adjacent = true;
                     }
-                    visited = true;
+                } else {
+                    is_adjacent = true;
+                    current[i] = true;
+
+                    if value != 0 {
+                        sum += value;
+                        value = 0;
+                    }
+
+                    remaining.retain(|(start, end, val)| {
+                        if i >= *start && i <= *end {
+                            sum += val;
+                            return false;
+                        } else if i > *end {
+                            return false;
+                        }
+                        return true;
+                    });
                 }
             } else {
-                visited = false;
+                if is_adjacent {
+                    if value != 0 {
+                        sum += value;
+                    }
+
+                    is_adjacent = false;
+                } else if value != 0 {
+                    let mut test: u32 = 1;
+                    let mut digits: usize = 0;
+                    while test <= value {
+                        test *= 10;
+                        digits += 1;
+                    }
+
+                    let start = (i - (digits - 1)).saturating_sub(2);
+                    next_remaining.push((start, i, value));
+                }
+
+                value = 0;
             }
 
-            x += 1;
+            i += 1;
         }
 
-        y += 1;
+        if is_adjacent {
+            if value != 0 {
+                sum += value;
+            }
+        } else if value != 0 {
+            let mut test: u32 = 1;
+            let mut digits: usize = 0;
+            while test <= value {
+                test *= 10;
+                digits += 1;
+            }
+
+            let start = (i - (digits - 1)).saturating_sub(2);
+            next_remaining.push((start, i, value));
+        }
+
+        previous = current;
+        remaining = next_remaining;
     }
 
     sum.into()
@@ -78,17 +137,17 @@ fn find_gear(
 
     let x_min = 0.max(x - 1);
 
-    for n_y in y.saturating_sub(1)..=(height - 1).min(y + 1) {
-        for n_x in x.saturating_sub(1)..=(width - 1).min(x + 1) {
+    for n_y in 0.max(y - 1)..=height.min(y + 1) {
+        for n_x in 0.max(x - 1)..=width.min(x + 1) {
             if data[n_y][n_x].is_numeric() {
                 if n_x > x_min && data[n_y][n_x - 1].is_numeric() {
                     continue;
                 }
 
                 if first.is_none() {
-                    first = Some(get_number_around(n_y, n_x, &data).0);
+                    first = Some(get_number_around(n_y, n_x, &data));
                 } else if second.is_none() {
-                    second = Some(get_number_around(n_y, n_x, &data).0);
+                    second = Some(get_number_around(n_y, n_x, &data));
                 } else {
                     return None;
                 }
@@ -105,27 +164,7 @@ fn find_gear(
     return None;
 }
 
-fn has_symbol_around(
-    y: usize,
-    start: usize,
-    end: usize,
-    data: &Vec<Vec<char>>,
-    height: usize,
-    width: usize,
-) -> bool {
-    for n_y in y.saturating_sub(1)..=(height - 1).min(y + 1) {
-        for n_x in start.saturating_sub(1)..=(width - 1).min(end + 1) {
-            let char = data[n_y][n_x];
-            if !char.is_numeric() && char != '.' {
-                return true;
-            }
-        }
-    }
-
-    false
-}
-
-fn get_number_around(y: usize, x: usize, data: &Vec<Vec<char>>) -> (u32, usize, usize) {
+fn get_number_around(y: usize, x: usize, data: &Vec<Vec<char>>) -> u32 {
     let mut start = x;
     while start > 0 && data[y][start - 1].is_numeric() {
         start -= 1;
@@ -143,5 +182,5 @@ fn get_number_around(y: usize, x: usize, data: &Vec<Vec<char>>) -> (u32, usize, 
         value += data[y][x].to_digit(10).unwrap();
     }
 
-    (value, start, end)
+    value
 }
