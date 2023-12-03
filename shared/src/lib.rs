@@ -115,3 +115,5 @@ pub fn total(time: Duration) {
         format!("{:#?}", remaining).truecolor(color, 255 - color, 0)
     );
 }
+
+pub mod vec2d;

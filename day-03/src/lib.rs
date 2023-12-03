@@ -1,4 +1,4 @@
-use shared::*;
+use shared::{vec2d::Vec2d, *};
 extern crate shared;
 
 const _TEST: &'static str = include_str!("_test.txt");
@@ -92,27 +92,16 @@ fn create_remainder(value: u32, i: usize) -> (usize, usize, u32) {
     (start, i, value)
 }
 
-pub const ADJ_EIGHT: [(isize, isize); 8] = [
-    (-1, 1),
-    (-1, 0),
-    (-1, -1),
-    (0, -1),
-    (0, 1),
-    (1, 1),
-    (1, 0),
-    (1, -1),
-];
-
-const HEIGHT: usize = 140;
-const WIDTH: usize = 141;
 pub fn part_2() -> Solution {
     let mut sum: u32 = 0;
+    let mut vec: Vec<char> = _INPUT.chars().collect();
+    vec.push('\n');
 
-    let map: Vec<char> = _INPUT.chars().collect();
+    let map = Vec2d::new(vec, 141, 140);
 
-    for y in 0..HEIGHT {
-        for x in 0..WIDTH - 1 {
-            if map[y * WIDTH + x] == '*' {
+    for y in 0..map.height {
+        for x in 0..map.width - 1 {
+            if map[(x, y)] == '*' {
                 if let Some(gear) = calculate_gear_ratio(x, y, &map) {
                     sum += gear;
                 }
@@ -123,26 +112,16 @@ pub fn part_2() -> Solution {
     sum.into()
 }
 
-fn calculate_gear_ratio(x: usize, y: usize, map: &Vec<char>) -> Option<u32> {
+fn calculate_gear_ratio(x: usize, y: usize, map: &Vec2d<char>) -> Option<u32> {
     let mut count = 0;
     let mut sum = 1;
 
-    for adj in ADJ_EIGHT {
-        let nx = x as isize + adj.0;
-        let ny = y as isize + adj.1;
-
-        if nx < 0 || nx >= WIDTH as isize || ny < 0 || ny >= HEIGHT as isize {
+    for (nx, ny) in map.adjacent(x, y) {
+        if y != ny && nx > x.saturating_sub(1) && map[(nx - 1, ny)].is_ascii_digit() {
             continue;
         }
 
-        let ny = ny as usize;
-        let nx = nx as usize;
-
-        if y != ny && nx > x.saturating_sub(1) && map[ny * WIDTH + nx - 1].is_ascii_digit() {
-            continue;
-        }
-
-        if map[ny * WIDTH + nx].is_ascii_digit() {
+        if map[(nx, ny)].is_ascii_digit() {
             if count == 2 {
                 return None;
             }
@@ -155,10 +134,10 @@ fn calculate_gear_ratio(x: usize, y: usize, map: &Vec<char>) -> Option<u32> {
     (count == 2).then(|| sum)
 }
 
-fn expand(x: usize, y: usize, map: &Vec<char>) -> u32 {
+fn expand(x: usize, y: usize, map: &Vec2d<char>) -> u32 {
     let mut start = x;
     loop {
-        if start > 0 && map[y * WIDTH + start - 1].is_ascii_digit() {
+        if start > 0 && map[(start - 1, y)].is_ascii_digit() {
             start -= 1;
         } else {
             break;
@@ -166,8 +145,8 @@ fn expand(x: usize, y: usize, map: &Vec<char>) -> u32 {
     }
 
     let mut value = 0;
-    for i in start..WIDTH - 1 {
-        if let Some(digit) = map[y * WIDTH + i].to_digit(10) {
+    for i in start..map.width - 1 {
+        if let Some(digit) = map[(i, y)].to_digit(10) {
             value = value * 10 + digit;
         } else {
             break;
