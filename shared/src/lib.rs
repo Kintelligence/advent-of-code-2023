@@ -18,6 +18,7 @@ pub enum Solution {
     U128(u128),
     Usize(usize),
     Str(String),
+    None,
 }
 
 impl Display for Solution {
@@ -36,6 +37,7 @@ impl Display for Solution {
             Self::U128(x) => x.fmt(f),
             Self::Usize(x) => x.fmt(f),
             Self::Str(x) => x.fmt(f),
+            Self::None => panic!("Cannot format NOTHING!"),
         }
     }
 }
@@ -76,6 +78,10 @@ pub fn execute(f: &dyn Fn() -> Solution, name: &str) -> Duration {
     let start = Instant::now();
     let result = f();
     let time = start.elapsed();
+
+    if let Solution::None = result {
+        return Duration::ZERO;
+    }
 
     let ratio = time.as_micros() as f64 / (Duration::from_secs(1) / 50).as_micros() as f64;
 
