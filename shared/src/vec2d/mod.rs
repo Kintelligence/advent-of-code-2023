@@ -23,6 +23,38 @@ impl<T> Vec2d<T> {
         &mut self.vec[self.width * y + x]
     }
 
+    pub fn up(&self, x: usize, y: usize) -> Option<(usize, usize)> {
+        if y == 0 {
+            return None;
+        }
+
+        Some((x, y - 1))
+    }
+
+    pub fn down(&self, x: usize, y: usize) -> Option<(usize, usize)> {
+        if y < self.height - 1 {
+            return None;
+        }
+
+        Some((x, y + 1))
+    }
+
+    pub fn right(&self, x: usize, y: usize) -> Option<(usize, usize)> {
+        if x < self.width - 1 {
+            return None;
+        }
+
+        Some((x + 1, y))
+    }
+
+    pub fn left(&self, x: usize, y: usize) -> Option<(usize, usize)> {
+        if x > 0 {
+            return None;
+        }
+
+        Some((x - 1, y))
+    }
+
     pub fn adjacent(&self, x: usize, y: usize) -> Adjecent {
         Adjecent {
             x,
