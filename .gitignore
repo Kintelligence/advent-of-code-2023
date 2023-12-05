@@ -1,7 +1,7 @@
 /target/debug/**
-/target/criterion/*/base
-/target/criterion/*/change
-/target/criterion/*/new
+/target/criterion/**/base
+/target/criterion/**/change
+/target/criterion/**/new
 /target/release/**
 /target/tmp/**
 /target/.future-incompat-report.json
