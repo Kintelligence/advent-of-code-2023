@@ -1,3 +1,4 @@
+use shared::parse::*;
 use shared::*;
 extern crate shared;
 
@@ -48,16 +49,8 @@ pub fn part_1() -> Solution {
 fn parse_seeds(input: &str) -> Vec<i64> {
     let mut seeds = Vec::new();
     if let Some((_, seed_line)) = input.split_once(' ') {
-        let mut value = 0;
-        for char in seed_line.chars() {
-            if let Some(digit) = char.to_digit(10) {
-                value = value * 10 + digit;
-            } else if value != 0 {
-                seeds.push(value as i64);
-                value = 0;
-            }
-        }
-        if value != 0 {
+        let mut seed_line = seed_line.chars();
+        while let Some(value) = parse_number(&mut seed_line) {
             seeds.push(value as i64);
         }
     }
@@ -88,26 +81,14 @@ fn parse_translation(line: &str) -> Option<Translation> {
         return None;
     }
 
-    let mut found = false;
-    let (mut dest, mut sorc) = (0, 0);
-    let mut value = 0;
-    for char in line.chars() {
-        if let Some(digit) = char.to_digit(10) {
-            value = value * 10 + digit;
-        } else {
-            if !found {
-                dest = value as i64;
-                found = true;
-            } else {
-                sorc = value as i64;
-            }
-            value = 0;
-        }
-    }
+    let mut line = line.chars();
+    let dest = parse_number(&mut line).unwrap() as i64;
+    let sorc = parse_number(&mut line).unwrap() as i64;
+    let length = parse_number(&mut line).unwrap() as i64;
 
     Some(Translation {
         start: sorc,
-        end: sorc + value as i64 - 1,
+        end: sorc + length - 1,
         offset: dest - sorc,
     })
 }
@@ -143,31 +124,11 @@ impl Range {
 fn parse_ranges(input: &str) -> Vec<Range> {
     let mut ranges = Vec::new();
     if let Some((_, seed_line)) = input.split_once(' ') {
-        let mut current: Option<u32> = None;
-        let mut previous: Option<u32> = None;
-        for char in seed_line.chars() {
-            if let Some(digit) = char.to_digit(10) {
-                if let Some(value) = current {
-                    current = Some(value * 10 + digit);
-                } else {
-                    current = Some(digit);
-                }
-            } else if let Some(a) = current {
-                if let Some(b) = previous {
-                    ranges.push(Range::parse(b, a));
-                    previous = None;
-                    current = None;
-                } else {
-                    previous = current;
-                    current = None;
-                }
-            }
-        }
+        let mut seed_line = seed_line.chars();
 
-        if let Some(a) = current {
-            if let Some(b) = previous {
-                ranges.push(Range::parse(b, a));
-            }
+        while let Some(start) = parse_number(&mut seed_line) {
+            let length = parse_number(&mut seed_line).unwrap();
+            ranges.push(Range::parse(start, length));
         }
     }
     ranges.sort_unstable_by_key(|range| range.start);
@@ -180,75 +141,73 @@ pub fn part_2() -> Solution {
         .and_then(|(left, right)| Some((parse_ranges(left), parse_maps(right))))
         .unwrap();
 
-    collapse_ranges(&mut ranges);
+    join_overlapping_ranges(&mut ranges);
 
     for map in maps {
-        {
-            let mut next_ranges: Vec<Range> = Vec::new();
-            let mut range_iter = ranges.iter_mut();
-            let mut translation_iter = map.iter();
+        let mut next_ranges: Vec<Range> = Vec::new();
+        let mut range_iter = ranges.iter_mut();
+        let mut translation_iter = map.iter();
 
-            let mut range = range_iter.next().unwrap();
-            let mut translation = translation_iter.next().unwrap();
+        let mut range = range_iter.next().unwrap();
+        let mut translation = translation_iter.next().unwrap();
 
-            loop {
-                if range.start > translation.end {
-                    if let Some(next) = translation_iter.next() {
-                        translation = next;
-                        continue;
-                    } else {
-                        next_ranges.push(*range);
-                        for range in range_iter {
-                            next_ranges.push(*range);
-                        }
-                        break;
-                    }
+        loop {
+            if range.start > translation.end {
+                if let Some(next) = translation_iter.next() {
+                    translation = next;
+                    continue;
                 } else {
-                    if range.start < translation.start && range.end > translation.start {
-                        next_ranges.push(Range::new(range.start, translation.start - 1));
-                        range.start = translation.start;
-                    }
-
-                    if range.start >= translation.start {
-                        if range.end > translation.end {
-                            next_ranges.push(Range::new(
-                                range.start + translation.offset,
-                                translation.end + translation.offset,
-                            ));
-                            range.start = translation.end + 1;
-                        } else {
-                            next_ranges.push(Range::new(
-                                range.start + translation.offset,
-                                range.end + translation.offset,
-                            ));
-
-                            if let Some(next) = range_iter.next() {
-                                range = next;
-                            } else {
-                                break;
-                            }
-                        }
-                    } else {
+                    next_ranges.push(*range);
+                    for range in range_iter {
                         next_ranges.push(*range);
+                    }
+                    break;
+                }
+            } else {
+                if range.start < translation.start && range.end > translation.start {
+                    next_ranges.push(Range::new(range.start, translation.start - 1));
+                    range.start = translation.start;
+                }
+
+                if range.start >= translation.start {
+                    if range.end > translation.end {
+                        next_ranges.push(Range::new(
+                            range.start + translation.offset,
+                            translation.end + translation.offset,
+                        ));
+                        range.start = translation.end + 1;
+                    } else {
+                        next_ranges.push(Range::new(
+                            range.start + translation.offset,
+                            range.end + translation.offset,
+                        ));
+
                         if let Some(next) = range_iter.next() {
                             range = next;
                         } else {
                             break;
                         }
                     }
+                } else {
+                    next_ranges.push(*range);
+                    if let Some(next) = range_iter.next() {
+                        range = next;
+                    } else {
+                        break;
+                    }
                 }
             }
-
-            ranges = next_ranges;
-            ranges.sort_unstable_by_key(|range| range.start);
-            collapse_ranges(&mut ranges);
         }
+
+        ranges = next_ranges;
+        ranges.sort_unstable_by_key(|range| range.start);
+        join_overlapping_ranges(&mut ranges);
     }
 
     ranges.first().unwrap().start.into()
 }
 
-fn collapse_ranges(ranges: &mut Vec<Range>) {
+fn join_overlapping_ranges(ranges: &mut Vec<Range>) {
     let mut offset = 0;
     let len = ranges.len() - 1;
     for i in 0..len {

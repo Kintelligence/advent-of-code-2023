@@ -116,4 +116,5 @@ pub fn total(time: Duration) {
     );
 }
 
+pub mod parse;
 pub mod vec2d;
