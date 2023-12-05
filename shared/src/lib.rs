@@ -1,5 +1,6 @@
 use std::{
     fmt::{Display, Formatter},
+    ops::Index,
     time::{Duration, Instant},
 };
 
@@ -74,7 +75,11 @@ impl From<&str> for Solution {
 
 use colored::Colorize;
 
+use crate::parse::parse_number;
+
 pub fn execute(f: &dyn Fn(&str) -> Solution, input: &str, name: &str) -> Duration {
+    let day = parse_number(&mut name.chars()).unwrap();
+    let title = day_name(day);
     let start = Instant::now();
     let result = f(input);
     let time = start.elapsed();
@@ -88,10 +93,10 @@ pub fn execute(f: &dyn Fn(&str) -> Solution, input: &str, name: &str) -> Duratio
     let color = (ratio * 255.0).min(255.0) as u8;
 
     println!(
-        "{: >12} {:} ({})",
-        String::from(name).cyan().bold(),
+        "{: >12} {:} => {}",
+        format!("{:#?}", time).truecolor(color, 255 - color, 0),
+        format!("{}: {}", name, title).cyan().bold(),
         format!("{}", result).bold(),
-        format!("{:#?}", time).truecolor(color, 255 - color, 0)
     );
 
     time
@@ -106,14 +111,25 @@ pub fn total(time: Duration) {
 
     println!(
         "{: >12} {}",
+        format!("{:#?}", time).truecolor(color, 255 - color, 0),
         "Total".cyan().bold(),
-        format!("{:#?}", time).truecolor(color, 255 - color, 0)
     );
     println!(
         "{: >12} {}",
+        format!("{:#?}", remaining).truecolor(color, 255 - color, 0),
         "Remaining".cyan().bold(),
-        format!("{:#?}", remaining).truecolor(color, 255 - color, 0)
     );
+}
+
+pub fn day_name(day: u32) -> &'static str {
+    match day {
+        1 => "Trebuchet?!",
+        2 => "Cube Conundrum",
+        3 => "Gear Ratios",
+        4 => "Scratchcards",
+        5 => "If You Give A Seed A Fertilizer",
+        _ => "Unnamed",
+    }
 }
 
 pub mod parse;
