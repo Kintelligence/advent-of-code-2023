@@ -5,7 +5,7 @@ use shared::{day_name, Solution};
 extern crate shared;
 
 fn criterion_benchmark(c: &mut Criterion) {
-    c.bench_function("Total", |b| {
+    c.bench_function("Total: All Days", |b| {
         b.iter(|| {
             for i in 1..=50 {
                 let (function, input, _) = day(i);

@@ -1,6 +1,5 @@
 use std::{
     fmt::{Display, Formatter},
-    ops::Index,
     time::{Duration, Instant},
 };
 
