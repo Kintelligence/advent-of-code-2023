@@ -1,11 +1,11 @@
 use shared::*;
 extern crate shared;
 
-const _TEST: &'static str = include_str!("_test.txt");
-const _INPUT: &'static str = include_str!("_input.txt");
+pub const _TEST: &'static str = include_str!("_test.txt");
+pub const _INPUT: &'static str = include_str!("_input.txt");
 
-pub fn part_1() -> Solution {
-    _INPUT
+pub fn part_1(_input: &str) -> Solution {
+    _input
         .lines()
         .map(|card| {
             let mut dupe: u128 = 0;
@@ -38,12 +38,12 @@ pub fn part_1() -> Solution {
         .into()
 }
 
-pub fn part_2() -> Solution {
+pub fn part_2(_input: &str) -> Solution {
     let mut card_count: [u32; 250] = [1; 250];
     let mut score = 0;
 
     let mut i = 0;
-    _INPUT.lines().for_each(|card| {
+    _input.lines().for_each(|card| {
         let count = card_count[i];
         let mut dupe: u128 = 0;
         let mut c = 0;

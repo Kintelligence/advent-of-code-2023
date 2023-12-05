@@ -1,11 +1,11 @@
 use shared::*;
 extern crate shared;
 
-const _TEST: &'static str = include_str!("_test.txt");
-const _INPUT: &'static str = include_str!("_input.txt");
+pub const _TEST: &'static str = include_str!("_test.txt");
+pub const _INPUT: &'static str = include_str!("_input.txt");
 
-pub fn part_1() -> Solution {
-    _INPUT
+pub fn part_1(_input: &str) -> Solution {
+    _input
         .lines()
         .map(|line| {
             let mut first = 0;
@@ -31,8 +31,8 @@ pub fn part_1() -> Solution {
         .into()
 }
 
-pub fn part_2() -> Solution {
-    _INPUT
+pub fn part_2(_input: &str) -> Solution {
+    _input
         .lines()
         .map(|line| {
             let mut first = 0;

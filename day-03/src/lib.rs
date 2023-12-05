@@ -1,15 +1,15 @@
 use shared::{vec2d::Vec2d, *};
 extern crate shared;
 
-const _TEST: &'static str = include_str!("_test.txt");
-const _INPUT: &'static str = include_str!("_input.txt");
+pub const _TEST: &'static str = include_str!("_test.txt");
+pub const _INPUT: &'static str = include_str!("_input.txt");
 
-pub fn part_1() -> Solution {
+pub fn part_1(_input: &str) -> Solution {
     let mut previous: [bool; 140] = [false; 140];
     let mut remaining: Vec<(usize, usize, u32)> = Vec::new();
     let mut sum: u32 = 0;
 
-    for line in _INPUT.lines() {
+    for line in _input.lines() {
         let mut next_remaining: Vec<(usize, usize, u32)> = Vec::new();
         let mut current: [bool; 140] = [false; 140];
         let mut value: u32 = 0;
@@ -92,9 +92,9 @@ fn create_remainder(value: u32, i: usize) -> (usize, usize, u32) {
     (start, i, value)
 }
 
-pub fn part_2() -> Solution {
+pub fn part_2(_input: &str) -> Solution {
     let mut sum: u32 = 0;
-    let mut vec: Vec<char> = _INPUT.chars().collect();
+    let mut vec: Vec<char> = _input.chars().collect();
     vec.push('\n');
 
     let map = Vec2d::new(vec, 141, 140);

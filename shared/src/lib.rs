@@ -74,9 +74,9 @@ impl From<&str> for Solution {
 
 use colored::Colorize;
 
-pub fn execute(f: &dyn Fn() -> Solution, name: &str) -> Duration {
+pub fn execute(f: &dyn Fn(&str) -> Solution, input: &str, name: &str) -> Duration {
     let start = Instant::now();
-    let result = f();
+    let result = f(input);
     let time = start.elapsed();
 
     if let Solution::None = result {

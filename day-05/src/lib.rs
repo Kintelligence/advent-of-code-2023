@@ -2,11 +2,11 @@ use shared::parse::*;
 use shared::*;
 extern crate shared;
 
-const _TEST: &'static str = include_str!("_test.txt");
-const _INPUT: &'static str = include_str!("_input.txt");
+pub const _TEST: &'static str = include_str!("_test.txt");
+pub const _INPUT: &'static str = include_str!("_input.txt");
 
-pub fn part_1() -> Solution {
-    let (mut values, maps) = _INPUT
+pub fn part_1(_input: &str) -> Solution {
+    let (mut values, maps) = _input
         .split_once('\n')
         .and_then(|(left, right)| Some((parse_seeds(left), parse_maps(right))))
         .unwrap();
@@ -135,8 +135,8 @@ fn parse_ranges(input: &str) -> Vec<Range> {
     ranges
 }
 
-pub fn part_2() -> Solution {
-    let (mut ranges, maps) = _INPUT
+pub fn part_2(_input: &str) -> Solution {
+    let (mut ranges, maps) = _input
         .split_once('\n')
         .and_then(|(left, right)| Some((parse_ranges(left), parse_maps(right))))
         .unwrap();

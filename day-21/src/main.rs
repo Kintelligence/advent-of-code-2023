@@ -3,6 +3,6 @@ use shared::*;
 extern crate shared;
 
 fn main() {
-    execute(&part_1, "21.1");
-    execute(&part_2, "21.2");
+    execute(&part_1, _INPUT, "21.1");
+    execute(&part_2, _INPUT, "21.2");
 }

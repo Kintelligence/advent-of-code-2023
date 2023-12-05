@@ -32,3 +32,10 @@ day-22 = { path = "../day-22" }
 day-23 = { path = "../day-23" }
 day-24 = { path = "../day-24" }
 day-25 = { path = "../day-25" }
+
+[dev-dependencies]
+criterion = { version = "0.4", features = ["html_reports"] }
+
+[[bench]]
+name = "benchmark"
+harness = false
