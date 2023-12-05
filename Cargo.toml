@@ -28,3 +28,4 @@ members = [
     "shared",
     "runner"
 ]
+resolver = "1"
