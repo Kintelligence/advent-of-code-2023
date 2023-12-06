@@ -50,7 +50,7 @@ fn parse_seeds(input: &str) -> Vec<i64> {
     let mut seeds = Vec::new();
     if let Some((_, seed_line)) = input.split_once(' ') {
         let mut seed_line = seed_line.chars();
-        while let Some(value) = parse_number(&mut seed_line) {
+        while let Some(value) = parse_u32(&mut seed_line) {
             seeds.push(value as i64);
         }
     }
@@ -82,9 +82,9 @@ fn parse_translation(line: &str) -> Option<Translation> {
     }
 
     let mut line = line.chars();
-    let dest = parse_number(&mut line).unwrap() as i64;
-    let sorc = parse_number(&mut line).unwrap() as i64;
-    let length = parse_number(&mut line).unwrap() as i64;
+    let dest = parse_u32(&mut line).unwrap() as i64;
+    let sorc = parse_u32(&mut line).unwrap() as i64;
+    let length = parse_u32(&mut line).unwrap() as i64;
 
     Some(Translation {
         start: sorc,
@@ -126,8 +126,8 @@ fn parse_ranges(input: &str) -> Vec<Range> {
     if let Some((_, seed_line)) = input.split_once(' ') {
         let mut seed_line = seed_line.chars();
 
-        while let Some(start) = parse_number(&mut seed_line) {
-            let length = parse_number(&mut seed_line).unwrap();
+        while let Some(start) = parse_u32(&mut seed_line) {
+            let length = parse_u32(&mut seed_line).unwrap();
             ranges.push(Range::parse(start, length));
         }
     }

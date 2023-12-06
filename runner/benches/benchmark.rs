@@ -14,17 +14,20 @@ fn criterion_benchmark(c: &mut Criterion) {
         })
     });
 
-    let mut bench_group = c.benchmark_group("Individual");
+    let mut group = c.benchmark_group("Individual");
+
     for i in 1..=50 {
         let (function, input, name) = day(i);
         if let Solution::None = function(input) {
         } else {
             let title = day_name((i + 1) / 2);
-            bench_group.bench_function(&format!("{}: {}", name, title), |b| {
+            group.bench_function(&format!("{}: {}", name, title), |b| {
                 b.iter(|| function(black_box(input)))
             });
         }
     }
+
+    group.finish();
 }
 
 criterion_group!(benches, criterion_benchmark);

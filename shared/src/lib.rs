@@ -74,10 +74,10 @@ impl From<&str> for Solution {
 
 use colored::Colorize;
 
-use crate::parse::parse_number;
+use crate::parse::parse_u32;
 
 pub fn execute(f: &dyn Fn(&str) -> Solution, input: &str, name: &str) -> Duration {
-    let day = parse_number(&mut name.chars()).unwrap();
+    let day = parse_u32(&mut name.chars()).unwrap();
     let title = day_name(day);
     let start = Instant::now();
     let result = f(input);
@@ -127,6 +127,7 @@ pub fn day_name(day: u32) -> &'static str {
         3 => "Gear Ratios",
         4 => "Scratchcards",
         5 => "If You Give A Seed A Fertilizer",
+        6 => "Wait For It",
         _ => "Unnamed",
     }
 }
