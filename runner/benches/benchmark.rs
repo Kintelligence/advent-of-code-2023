@@ -1,4 +1,4 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{black_box, criterion_group, criterion_main, Criterion, PlotConfiguration};
 use runner::day;
 use shared::{day_name, Solution};
 
@@ -15,6 +15,8 @@ fn criterion_benchmark(c: &mut Criterion) {
     });
 
     let mut group = c.benchmark_group("Individual");
+    group
+        .plot_config(PlotConfiguration::default().summary_scale(criterion::AxisScale::Logarithmic));
 
     for i in 1..=50 {
         let (function, input, name) = day(i);
