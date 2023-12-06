@@ -7,6 +7,14 @@ pub struct Vec2d<T> {
 }
 
 impl<T> Vec2d<T> {
+    pub fn from_vec(vec: Vec<T>, height: usize) -> Self {
+        Self {
+            width: vec.len() / height,
+            vec,
+            height,
+        }
+    }
+
     pub fn new(vec: Vec<T>, width: usize, height: usize) -> Self {
         Self { vec, width, height }
     }

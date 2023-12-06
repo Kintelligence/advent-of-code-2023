@@ -1,7 +1,7 @@
 use shared::*;
 extern crate shared;
 
-pub const _TEST: &'static str = include_str!("_test.txt");
+const _TEST: &'static str = include_str!("_test.txt");
 pub const _INPUT: &'static str = include_str!("_input.txt");
 
 pub fn part_1(_input: &str) -> Solution {
@@ -51,4 +51,29 @@ pub fn part_2(_input: &str) -> Solution {
         })
         .sum::<u32>()
         .into()
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::*;
+
+    #[test]
+    fn part_1_test() {
+        assert_eq!(part_1(_TEST), Solution::Usize(8))
+    }
+
+    #[test]
+    fn part_1_input() {
+        assert_eq!(part_1(_INPUT), Solution::Usize(2348))
+    }
+
+    #[test]
+    fn part_2_test() {
+        assert_eq!(part_2(_TEST), Solution::U32(2286))
+    }
+
+    #[test]
+    fn part_2_input() {
+        assert_eq!(part_2(_INPUT), Solution::U32(76008))
+    }
 }

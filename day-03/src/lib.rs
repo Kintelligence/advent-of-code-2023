@@ -1,7 +1,7 @@
 use shared::{vec2d::Vec2d, *};
 extern crate shared;
 
-pub const _TEST: &'static str = include_str!("_test.txt");
+const _TEST: &'static str = include_str!("_test.txt");
 pub const _INPUT: &'static str = include_str!("_input.txt");
 
 pub fn part_1(_input: &str) -> Solution {
@@ -97,7 +97,7 @@ pub fn part_2(_input: &str) -> Solution {
     let mut vec: Vec<char> = _input.chars().collect();
     vec.push('\n');
 
-    let map = Vec2d::new(vec, 141, 140);
+    let map = Vec2d::from_vec(vec, _input.lines().count());
 
     for y in 0..map.height {
         for x in 0..map.width - 1 {
@@ -154,4 +154,29 @@ fn expand(x: usize, y: usize, map: &Vec2d<char>) -> u32 {
     }
 
     value
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::*;
+
+    #[test]
+    fn part_1_test() {
+        assert_eq!(part_1(_TEST), Solution::U32(4361))
+    }
+
+    #[test]
+    fn part_1_input() {
+        assert_eq!(part_1(_INPUT), Solution::U32(539713))
+    }
+
+    #[test]
+    fn part_2_test() {
+        assert_eq!(part_2(_TEST), Solution::U32(467835))
+    }
+
+    #[test]
+    fn part_2_input() {
+        assert_eq!(part_2(_INPUT), Solution::U32(84159075))
+    }
 }

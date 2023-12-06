@@ -2,7 +2,7 @@ use shared::parse::*;
 use shared::*;
 extern crate shared;
 
-pub const _TEST: &'static str = include_str!("_test.txt");
+const _TEST: &'static str = include_str!("_test.txt");
 pub const _INPUT: &'static str = include_str!("_input.txt");
 
 pub fn part_1(_input: &str) -> Solution {
@@ -222,5 +222,30 @@ fn join_overlapping_ranges(ranges: &mut Vec<Range>) {
             ranges.remove(i + 1 - offset);
             offset += 1;
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::*;
+
+    #[test]
+    fn part_1_test() {
+        assert_eq!(part_1(_TEST), Solution::I64(35))
+    }
+
+    #[test]
+    fn part_1_input() {
+        assert_eq!(part_1(_INPUT), Solution::I64(226172555))
+    }
+
+    #[test]
+    fn part_2_test() {
+        assert_eq!(part_2(_TEST), Solution::I64(46))
+    }
+
+    #[test]
+    fn part_2_input() {
+        assert_eq!(part_2(_INPUT), Solution::I64(47909639))
     }
 }

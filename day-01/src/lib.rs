@@ -1,7 +1,8 @@
 use shared::*;
 extern crate shared;
 
-pub const _TEST: &'static str = include_str!("_test.txt");
+const _TEST1: &'static str = include_str!("_test1.txt");
+const _TEST2: &'static str = include_str!("_test2.txt");
 pub const _INPUT: &'static str = include_str!("_input.txt");
 
 pub fn part_1(_input: &str) -> Solution {
@@ -98,4 +99,29 @@ fn parse_digit_start(str: &str) -> Option<u32> {
         }
     }
     None
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::*;
+
+    #[test]
+    fn part_1_test() {
+        assert_eq!(part_1(_TEST1), Solution::U32(142))
+    }
+
+    #[test]
+    fn part_1_input() {
+        assert_eq!(part_1(_INPUT), Solution::U32(54630))
+    }
+
+    #[test]
+    fn part_2_test() {
+        assert_eq!(part_2(_TEST2), Solution::U32(281))
+    }
+
+    #[test]
+    fn part_2_input() {
+        assert_eq!(part_2(_INPUT), Solution::U32(54770))
+    }
 }

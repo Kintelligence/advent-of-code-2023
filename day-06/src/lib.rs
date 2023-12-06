@@ -1,7 +1,7 @@
 use shared::{parse::parse_u64, *};
 extern crate shared;
 
-pub const _TEST: &'static str = include_str!("_test.txt");
+const _TEST: &'static str = include_str!("_test.txt");
 pub const _INPUT: &'static str = include_str!("_input.txt");
 
 pub fn part_1(_input: &str) -> Solution {
@@ -79,4 +79,29 @@ where
     }
 
     races
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::*;
+
+    #[test]
+    fn part_1_test() {
+        assert_eq!(part_1(_TEST), Solution::U64(288))
+    }
+
+    #[test]
+    fn part_1_input() {
+        assert_eq!(part_1(_INPUT), Solution::U64(275724))
+    }
+
+    #[test]
+    fn part_2_test() {
+        assert_eq!(part_2(_TEST), Solution::U64(71503))
+    }
+
+    #[test]
+    fn part_2_input() {
+        assert_eq!(part_2(_INPUT), Solution::U64(37286485))
+    }
 }
