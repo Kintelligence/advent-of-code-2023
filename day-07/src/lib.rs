@@ -59,8 +59,8 @@ impl Hand {
             }
         }
 
-        cards.sort_unstable();
-        strength |= calculate_type(cards[12] + jokers, cards[11]) << 20;
+        let (max, sec) = find_two_highest(&cards);
+        strength |= calculate_type(max, sec) << 20;
 
         let bid = parse_u32(&mut chars).expect("expected bid");
 
@@ -94,13 +94,28 @@ impl Hand {
             }
         }
 
-        cards.sort_unstable();
-        strength |= calculate_type(cards[12] + jokers, cards[11]) << 20;
+        let (max, sec) = find_two_highest(&cards);
+        strength |= calculate_type(max + jokers, sec) << 20;
 
         let bid = parse_u32(&mut chars).expect("expected bid");
 
         Hand { bid, strength }
     }
+}
+
+fn find_two_highest(cards: &[u32; 13]) -> (u32, u32) {
+    let (mut max, mut sec) = (0, 0);
+
+    cards.iter().for_each(|count| {
+        if *count > max {
+            sec = max;
+            max = *count;
+        } else if *count > sec {
+            sec = *count;
+        }
+    });
+
+    (max, sec)
 }
 
 fn calculate_type(most_matches: u32, second_most_matches: u32) -> u32 {
