@@ -60,17 +60,7 @@ impl Hand {
         }
 
         cards.sort_unstable();
-        let hand_type = match cards[12] {
-            5 => 6,
-            4 => 5,
-            3 if cards[11] == 2 => 4,
-            3 => 3,
-            2 if cards[11] == 2 => 2,
-            2 => 1,
-            _ => 0,
-        };
-
-        strength |= hand_type << 20;
+        strength |= calculate_type(cards[12] + jokers, cards[11]) << 20;
 
         let bid = parse_u32(&mut chars).expect("expected bid");
 
@@ -105,21 +95,23 @@ impl Hand {
         }
 
         cards.sort_unstable();
-        let hand_type = match cards[12] + jokers {
-            5 => 6,
-            4 => 5,
-            3 if cards[11] == 2 => 4,
-            3 => 3,
-            2 if cards[11] == 2 => 2,
-            2 => 1,
-            _ => 0,
-        };
-
-        strength |= hand_type << 20;
+        strength |= calculate_type(cards[12] + jokers, cards[11]) << 20;
 
         let bid = parse_u32(&mut chars).expect("expected bid");
 
         Hand { bid, strength }
+    }
+}
+
+fn calculate_type(most_matches: u32, second_most_matches: u32) -> u32 {
+    match most_matches {
+        5 => 6,
+        4 => 5,
+        3 if second_most_matches == 2 => 4,
+        3 => 3,
+        2 if second_most_matches == 2 => 2,
+        2 => 1,
+        _ => 0,
     }
 }
 
