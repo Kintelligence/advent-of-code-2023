@@ -1,4 +1,4 @@
-use shared::*;
+use shared::{parse::ToDigit, *};
 extern crate shared;
 
 const _TEST1: &'static str = include_str!("_test1.txt");
@@ -12,16 +12,16 @@ pub fn part_1(_input: &str) -> Solution {
             let mut first = 0;
             let mut last = 0;
 
-            for ch in line.chars() {
-                if ch.is_ascii_digit() {
-                    first = ch.to_digit(10).unwrap();
+            for byte in line.bytes() {
+                if let Some(digit) = byte.to_digit() {
+                    first = digit as u32;
                     break;
                 }
             }
 
-            for ch in line.chars().rev() {
-                if ch.is_ascii_digit() {
-                    last = ch.to_digit(10).unwrap();
+            for byte in line.bytes().rev() {
+                if let Some(digit) = byte.to_digit() {
+                    last = digit as u32;
                     break;
                 }
             }
@@ -47,8 +47,8 @@ pub fn part_2(_input: &str) -> Solution {
                 }
 
                 if let Some(ch) = chars.next() {
-                    if ch.is_ascii_digit() {
-                        first = ch.to_digit(10).unwrap();
+                    if let Some(digit) = ch.to_digit(10) {
+                        first = digit;
                         break;
                     }
                 } else {
@@ -64,8 +64,8 @@ pub fn part_2(_input: &str) -> Solution {
                 }
 
                 if let Some(ch) = chars.next_back() {
-                    if ch.is_ascii_digit() {
-                        last = ch.to_digit(10).unwrap();
+                    if let Some(digit) = ch.to_digit(10) {
+                        last = digit;
                         break;
                     }
                 } else {

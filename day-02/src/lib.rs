@@ -1,4 +1,4 @@
-use shared::*;
+use shared::{parse::Parsable, *};
 extern crate shared;
 
 const _TEST: &'static str = include_str!("_test.txt");
@@ -9,19 +9,18 @@ pub fn part_1(_input: &str) -> Solution {
         .lines()
         .enumerate()
         .map(|(id, line)| {
-            let mut split = line.split([':', ' ', ';', ',']).skip(3);
+            let mut bytes = line.bytes();
+            let _: Option<u32> = bytes.next_number();
 
-            while let Some(v) = split.next() {
-                if let Ok(val) = v.parse::<u32>() {
-                    match split.next().unwrap().chars().next().unwrap() {
-                        'r' if val > 12 => return 0,
-                        'g' if val > 13 => return 0,
-                        'b' if val > 14 => return 0,
-                        _ => {}
-                    }
+            while let Some(value) = bytes.next_number() {
+                let value: u32 = value;
+                match bytes.next().unwrap() {
+                    b'r' if value > 12 => return 0,
+                    b'g' if value > 13 => return 0,
+                    b'b' if value > 14 => return 0,
+                    _ => {}
                 }
             }
-
             id + 1
         })
         .sum::<usize>()
@@ -34,16 +33,15 @@ pub fn part_2(_input: &str) -> Solution {
         .map(|line| {
             let (mut red, mut green, mut blue) = (0, 0, 0);
 
-            let mut split = line.split([':', ' ', ';', ',']).skip(3);
+            let mut bytes = line.bytes();
+            let _: Option<u32> = bytes.next_number();
 
-            while let Some(v) = split.next() {
-                if let Ok(val) = v.parse::<u32>() {
-                    match split.next().unwrap().chars().next().unwrap() {
-                        'r' if red < val => red = val,
-                        'g' if green < val => green = val,
-                        'b' if blue < val => blue = val,
-                        _ => {}
-                    }
+            while let Some(value) = bytes.next_number() {
+                match bytes.next().unwrap() {
+                    b'r' if red < value => red = value,
+                    b'g' if green < value => green = value,
+                    b'b' if blue < value => blue = value,
+                    _ => {}
                 }
             }
 

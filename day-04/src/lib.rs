@@ -1,4 +1,4 @@
-use shared::*;
+use shared::{parse::Parsable, *};
 extern crate shared;
 
 const _TEST: &'static str = include_str!("_test.txt");
@@ -12,23 +12,15 @@ pub fn part_1(_input: &str) -> Solution {
             let mut c = 1;
 
             if let Some((_, numbers)) = card.split_once(':') {
-                let mut chs = numbers.chars();
-                let mut n = 0;
-                while let Some(ch) = chs.next() {
-                    if let Some(digit) = ch.to_digit(10) {
-                        n = n * 10 + digit;
-                    } else if n != 0 {
-                        if (1 << n) & dupe > 0 {
-                            c *= 2;
-                        }
+                let mut bytes = numbers.bytes();
 
-                        dupe |= 1 << n;
-                        n = 0;
+                while let Some(number) = bytes.next_number() {
+                    let number: u32 = number;
+                    if 1 << number & dupe > 0 {
+                        c *= 2;
+                    } else {
+                        dupe |= 1 << number;
                     }
-                }
-
-                if n != 0 && ((1 << n) & dupe > 0) {
-                    c *= 2;
                 }
             }
 
@@ -49,25 +41,16 @@ pub fn part_2(_input: &str) -> Solution {
         let mut c = 0;
 
         if let Some((_, numbers)) = card.split_once(':') {
-            let mut chs = numbers.chars();
-            let mut n = 0;
-            while let Some(ch) = chs.next() {
-                if let Some(digit) = ch.to_digit(10) {
-                    n = n * 10 + digit;
-                } else if n != 0 {
-                    if (1 << n) & dupe > 0 {
-                        c += 1;
-                        card_count[i + c] += count;
-                    }
+            let mut bytes = numbers.bytes();
 
-                    dupe |= 1 << n;
-                    n = 0;
+            while let Some(number) = bytes.next_number() {
+                let number: u32 = number;
+                if 1 << number & dupe > 0 {
+                    c += 1;
+                    card_count[i + c] += count;
+                } else {
+                    dupe |= 1 << number;
                 }
-            }
-
-            if n != 0 && ((1 << n) & dupe > 0) {
-                c += 1;
-                card_count[i + c] += count;
             }
         }
 

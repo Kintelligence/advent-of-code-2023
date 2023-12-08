@@ -1,4 +1,4 @@
-use shared::{parse::parse_u32, *};
+use shared::{parse::Parsable, *};
 extern crate shared;
 
 const _TEST: &'static str = include_str!("_test.txt");
@@ -40,80 +40,80 @@ struct Hand {
 // type    1        2       3     4     5
 impl Hand {
     fn new(line: &str) -> Self {
-        let mut chars = line.chars();
+        let mut bytes = line.bytes();
         let mut strength: u32 = 0;
 
-        let mut cards: [u32; 13] = [0; 13];
+        let mut counts: [u32; 13] = [0; 13];
         for i in 0..5 {
-            if let Some(card) = chars.next() {
+            if let Some(card) = bytes.next() {
                 let value = match card {
-                    'A' => 12,
-                    'K' => 11,
-                    'Q' => 10,
-                    'J' => 9,
-                    'T' => 8,
-                    num => num.to_digit(10).unwrap() as u32 - 2,
+                    b'A' => 12,
+                    b'K' => 11,
+                    b'Q' => 10,
+                    b'J' => 9,
+                    b'T' => 8,
+                    n => n - b'0' - 2,
                 };
-                strength |= value << ((4 - i) * 4);
-                cards[value as usize] += 1;
+                strength |= (value as u32) << ((4 - i) * 4);
+                counts[value as usize] += 1;
             }
         }
 
-        let (max, sec) = find_two_highest(&cards);
+        let (max, sec) = find_two_highest(&counts);
         strength |= calculate_type(max, sec) << 20;
 
-        let bid = parse_u32(&mut chars).expect("expected bid");
+        let bid = bytes.next_number().expect("expected bid");
 
         Hand { bid, strength }
     }
 
     fn new_with_jokers(line: &str) -> Self {
-        let mut chars = line.chars();
+        let mut bytes = line.bytes();
         let mut strength: u32 = 0;
         let mut jokers = 0;
 
-        let mut cards: [u32; 13] = [0; 13];
+        let mut counts: [u32; 13] = [0; 13];
         for i in 0..5 {
-            if let Some(card) = chars.next() {
+            if let Some(card) = bytes.next() {
                 let value = match card {
-                    'A' => 12,
-                    'K' => 11,
-                    'Q' => 10,
-                    'J' => 0,
-                    'T' => 9,
-                    num => num.to_digit(10).unwrap() as u32 - 1,
+                    b'A' => 12,
+                    b'K' => 11,
+                    b'Q' => 10,
+                    b'J' => 0,
+                    b'T' => 9,
+                    n => n - b'0' - 1,
                 };
 
                 if value == 0 {
                     jokers += 1;
                 } else {
-                    cards[value as usize] += 1;
+                    counts[value as usize] += 1;
                 }
 
-                strength |= value << ((4 - i) * 4);
+                strength |= (value as u32) << ((4 - i) * 4);
             }
         }
 
-        let (max, sec) = find_two_highest(&cards);
+        let (max, sec) = find_two_highest(&counts);
         strength |= calculate_type(max + jokers, sec) << 20;
 
-        let bid = parse_u32(&mut chars).expect("expected bid");
+        let bid = bytes.next_number().expect("expected bid");
 
         Hand { bid, strength }
     }
 }
 
-fn find_two_highest(cards: &[u32; 13]) -> (u32, u32) {
+fn find_two_highest(counts: &[u32; 13]) -> (u32, u32) {
     let (mut max, mut sec) = (0, 0);
 
-    cards.iter().for_each(|count| {
+    for count in counts.iter() {
         if *count > max {
             sec = max;
             max = *count;
         } else if *count > sec {
             sec = *count;
         }
-    });
+    }
 
     (max, sec)
 }

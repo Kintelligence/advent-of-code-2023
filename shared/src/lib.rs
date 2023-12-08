@@ -74,11 +74,7 @@ impl From<&str> for Solution {
 
 use colored::Colorize;
 
-use crate::parse::parse_u32;
-
-pub fn execute(f: &dyn Fn(&str) -> Solution, input: &str, name: &str) -> Duration {
-    let day = parse_u32(&mut name.chars()).unwrap();
-    let title = day_name(day);
+pub fn execute(f: &dyn Fn(&str) -> Solution, input: &str, day: &str, name: &str) -> Duration {
     let start = Instant::now();
     let result = f(input);
     let time = start.elapsed();
@@ -94,7 +90,7 @@ pub fn execute(f: &dyn Fn(&str) -> Solution, input: &str, name: &str) -> Duratio
     println!(
         "{: >12} {:} => {}",
         format!("{:#?}", time).truecolor(color, 255 - color, 0),
-        format!("{}: {}", name, title).cyan().bold(),
+        format!("{}: {}", day, name).cyan().bold(),
         format!("{}", result).bold(),
     );
 

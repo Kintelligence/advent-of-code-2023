@@ -1,5 +1,4 @@
-use shared::parse::*;
-use shared::*;
+use shared::{parse::Parsable, *};
 extern crate shared;
 
 const _TEST: &'static str = include_str!("_test.txt");
@@ -49,9 +48,9 @@ pub fn part_1(_input: &str) -> Solution {
 fn parse_seeds(input: &str) -> Vec<i64> {
     let mut seeds = Vec::new();
     if let Some((_, seed_line)) = input.split_once(' ') {
-        let mut seed_line = seed_line.chars();
-        while let Some(value) = parse_u32(&mut seed_line) {
-            seeds.push(value as i64);
+        let mut seed_line = seed_line.bytes();
+        while let Some(value) = seed_line.next_number() {
+            seeds.push(value);
         }
     }
     seeds.sort_unstable();
@@ -81,10 +80,10 @@ fn parse_translation(line: &str) -> Option<Translation> {
         return None;
     }
 
-    let mut line = line.chars();
-    let dest = parse_u32(&mut line).unwrap() as i64;
-    let sorc = parse_u32(&mut line).unwrap() as i64;
-    let length = parse_u32(&mut line).unwrap() as i64;
+    let mut bytes = line.bytes();
+    let dest: i64 = bytes.next_number().expect("expected destination");
+    let sorc: i64 = bytes.next_number().expect("expected source");
+    let length: i64 = bytes.next_number().expect("expected lenght");
 
     Some(Translation {
         start: sorc,
@@ -124,10 +123,10 @@ impl Range {
 fn parse_ranges(input: &str) -> Vec<Range> {
     let mut ranges = Vec::new();
     if let Some((_, seed_line)) = input.split_once(' ') {
-        let mut seed_line = seed_line.chars();
+        let mut bytes = seed_line.bytes();
 
-        while let Some(start) = parse_u32(&mut seed_line) {
-            let length = parse_u32(&mut seed_line).unwrap();
+        while let Some(start) = bytes.next_number() {
+            let length = bytes.next_number().unwrap();
             ranges.push(Range::parse(start, length));
         }
     }
