@@ -125,6 +125,7 @@ pub fn day_name(day: u32) -> &'static str {
         5 => "If You Give A Seed A Fertilizer",
         6 => "Wait For It",
         7 => "Camel Cards",
+        8 => "Haunted Wasteland",
         _ => "Unnamed",
     }
 }
