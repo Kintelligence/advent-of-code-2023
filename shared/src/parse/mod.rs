@@ -38,9 +38,46 @@ macro_rules! parsable_number {
     };
 }
 
+macro_rules! parsable_negative_number {
+    ($type:ident) => {
+        impl<T: Iterator<Item = u8>> Parsable<$type> for T {
+            fn next_number(&mut self) -> Option<$type> {
+                let mut negative = false;
+                let mut value: Option<$type> = None;
+                for byte in self {
+                    if let Some(digit) = byte.to_digit() {
+                        if let Some(current) = value {
+                            value = Some(current * 10 + digit as $type);
+                        } else {
+                            value = Some(digit as $type);
+                        }
+                    } else if let Some(value) = value {
+                        if negative {
+                            return Some(-value);
+                        }
+                        return Some(value);
+                    } else if byte == b'-' {
+                        negative = true;
+                    } else {
+                        negative = false;
+                    }
+                }
+
+                if let Some(value) = value {
+                    if negative {
+                        return Some(-value);
+                    }
+                    return Some(value);
+                }
+                None
+            }
+        }
+    };
+}
+
 parsable_number!(u32);
 parsable_number!(u64);
 parsable_number!(u128);
-parsable_number!(i32);
-parsable_number!(i64);
-parsable_number!(i128);
+parsable_negative_number!(i32);
+parsable_negative_number!(i64);
+parsable_negative_number!(i128);
