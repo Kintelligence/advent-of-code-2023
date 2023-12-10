@@ -127,9 +127,11 @@ pub fn day_name(day: u32) -> &'static str {
         7 => "Camel Cards",
         8 => "Haunted Wasteland",
         9 => "Mirage Maintenance",
+        10 => "Pipe Maze",
         _ => "Unnamed",
     }
 }
 
 pub mod parse;
+pub mod point_vec2d;
 pub mod vec2d;

@@ -1,0 +1,267 @@
+use core::fmt;
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub struct Point {
+    pub x: usize,
+    pub y: usize,
+}
+
+impl Point {
+    pub fn new(x: usize, y: usize) -> Self {
+        Point { x, y }
+    }
+}
+
+pub const DIRECTIONS: [Direction; 4] = [
+    Direction::North,
+    Direction::East,
+    Direction::South,
+    Direction::West,
+];
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Direction {
+    North,
+    East,
+    South,
+    West,
+}
+
+pub struct PointVec2d<T> {
+    pub vec: Vec<T>,
+    pub width: usize,
+    pub height: usize,
+}
+
+impl<T> PointVec2d<T> {
+    pub fn from_vec(vec: Vec<T>, height: usize) -> Self {
+        Self {
+            width: vec.len() / height,
+            vec,
+            height,
+        }
+    }
+
+    pub fn new(vec: Vec<T>, width: usize, height: usize) -> Self {
+        Self { vec, width, height }
+    }
+
+    pub fn row(&self, y: usize) -> &[T] {
+        &self.vec[self.width * y..(self.width * y + self.width)]
+    }
+
+    pub fn index(&self, point: Point) -> &T {
+        &self.vec[self.width * point.y + point.x]
+    }
+
+    pub fn index_mut(&mut self, point: Point) -> &mut T {
+        &mut self.vec[self.width * point.y + point.x]
+    }
+
+    pub fn go(&self, point: Point, direction: Direction) -> Option<Point> {
+        match direction {
+            Direction::North => self.up(point),
+            Direction::East => self.right(point),
+            Direction::South => self.down(point),
+            Direction::West => self.left(point),
+        }
+    }
+
+    pub fn up(&self, point: Point) -> Option<Point> {
+        if point.y == 0 {
+            return None;
+        }
+
+        Some(Point::new(point.x, point.y - 1))
+    }
+
+    pub fn down(&self, point: Point) -> Option<Point> {
+        if point.y >= self.height - 1 {
+            return None;
+        }
+
+        Some(Point::new(point.x, point.y + 1))
+    }
+
+    pub fn right(&self, point: Point) -> Option<Point> {
+        if point.x >= self.width - 1 {
+            return None;
+        }
+
+        Some(Point::new(point.x + 1, point.y))
+    }
+
+    pub fn left(&self, point: Point) -> Option<Point> {
+        if point.x == 0 {
+            return None;
+        }
+
+        Some(Point::new(point.x - 1, point.y))
+    }
+
+    pub fn adjacent(&self, point: Point) -> Adjecent {
+        Adjecent {
+            x: point.x,
+            y: point.y,
+            height: self.height,
+            width: self.width,
+            current: 0,
+        }
+    }
+
+    pub fn neighbours(&self, point: Point) -> Neighbours {
+        Neighbours {
+            x: point.x,
+            y: point.y,
+            height: self.height,
+            width: self.width,
+            current: 0,
+        }
+    }
+
+    pub fn diagonals(&self, point: Point) -> Diagonals {
+        Diagonals {
+            x: point.x,
+            y: point.y,
+            height: self.height,
+            width: self.width,
+            current: 0,
+        }
+    }
+}
+
+impl<T> std::ops::Index<Point> for PointVec2d<T> {
+    fn index(&self, index: Point) -> &T {
+        self.index(index)
+    }
+
+    type Output = T;
+}
+
+impl<T> std::ops::IndexMut<Point> for PointVec2d<T> {
+    fn index_mut(&mut self, index: Point) -> &mut T {
+        self.index_mut(index)
+    }
+}
+
+impl<T: std::fmt::Debug> std::fmt::Display for PointVec2d<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut str = String::new();
+        for i in 0..self.height {
+            if i != 0 {
+                str.push_str(", ");
+            }
+            str.push_str(&format!("{:?}", &self.row(i)));
+            str.push('\n');
+        }
+        write!(f, "{}", str)
+    }
+}
+
+pub const ADJ_EIGHT: [(isize, isize); 8] = [
+    (-1, 1),
+    (-1, 0),
+    (-1, -1),
+    (0, -1),
+    (0, 1),
+    (1, 1),
+    (1, 0),
+    (1, -1),
+];
+
+pub struct Adjecent {
+    x: usize,
+    y: usize,
+    height: usize,
+    width: usize,
+    current: usize,
+}
+
+impl Iterator for Adjecent {
+    type Item = Point;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            if self.current > 7 {
+                return None;
+            }
+
+            let nx = self.x as isize + ADJ_EIGHT[self.current].0;
+            let ny = self.y as isize + ADJ_EIGHT[self.current].1;
+
+            self.current += 1;
+
+            if nx < 0 || nx >= self.width as isize || ny < 0 || ny >= self.height as isize {
+                continue;
+            }
+
+            return Some(Point::new(nx as usize, ny as usize));
+        }
+    }
+}
+
+pub const ADJ_FOUR: [(isize, isize); 4] = [(-1, 0), (0, -1), (0, 1), (1, 0)];
+
+pub struct Neighbours {
+    x: usize,
+    y: usize,
+    height: usize,
+    width: usize,
+    current: usize,
+}
+
+impl Iterator for Neighbours {
+    type Item = Point;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            if self.current > 3 {
+                return None;
+            }
+
+            let nx = self.x as isize + ADJ_FOUR[self.current].0;
+            let ny = self.y as isize + ADJ_FOUR[self.current].1;
+
+            self.current += 1;
+
+            if nx < 0 || nx >= self.width as isize || ny < 0 || ny >= self.height as isize {
+                continue;
+            }
+
+            return Some(Point::new(nx as usize, ny as usize));
+        }
+    }
+}
+
+pub const DIAGONAL: [(isize, isize); 4] = [(-1, 1), (1, -1), (1, 1), (-1, -1)];
+
+pub struct Diagonals {
+    x: usize,
+    y: usize,
+    height: usize,
+    width: usize,
+    current: usize,
+}
+
+impl Iterator for Diagonals {
+    type Item = Point;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            if self.current > 3 {
+                return None;
+            }
+
+            let nx = self.x as isize + DIAGONAL[self.current].0;
+            let ny = self.y as isize + DIAGONAL[self.current].1;
+
+            self.current += 1;
+
+            if nx < 0 || nx >= self.width as isize || ny < 0 || ny >= self.height as isize {
+                continue;
+            }
+
+            return Some(Point::new(nx as usize, ny as usize));
+        }
+    }
+}
