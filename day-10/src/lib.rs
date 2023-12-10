@@ -118,49 +118,15 @@ pub fn part_2(_input: &str) -> Solution {
 
     for i in 0..visited.height {
         let mut inside_loop = false;
-        let mut last_direction: Option<Direction> = None;
 
         for tile in visited.row(i).iter() {
             match tile {
                 Tile::Start => panic!("Should not have a start"),
-                Tile::Pipe(connection) => match connection {
-                    NS => inside_loop = !inside_loop,
-                    EW => {}
-                    NE => {
-                        if last_direction.is_some() {
-                            panic!("should not happen");
-                        }
-                        last_direction = Some(North);
+                Tile::Pipe(connection) => {
+                    if *connection == NS || *connection == NE || *connection == NW {
+                        inside_loop = !inside_loop;
                     }
-                    NW => {
-                        if let Some(last) = last_direction {
-                            if last == South {
-                                inside_loop = !inside_loop;
-                            }
-
-                            last_direction = None;
-                        } else {
-                            panic!("should not happen");
-                        }
-                    }
-                    SE => {
-                        if last_direction.is_some() {
-                            panic!("should not happen");
-                        }
-                        last_direction = Some(South);
-                    }
-                    SW => {
-                        if let Some(last) = last_direction {
-                            if last == North {
-                                inside_loop = !inside_loop;
-                            }
-
-                            last_direction = None;
-                        } else {
-                            panic!("should not happen");
-                        }
-                    }
-                },
+                }
                 Tile::Empty => {
                     if inside_loop {
                         area += 1;
