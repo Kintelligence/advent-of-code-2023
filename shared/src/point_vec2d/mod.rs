@@ -6,6 +6,12 @@ pub struct Point {
     pub y: usize,
 }
 
+impl std::fmt::Display for Point {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "({},{})", self.x, self.y)
+    }
+}
+
 impl Point {
     pub fn new(x: usize, y: usize) -> Self {
         Point { x, y }

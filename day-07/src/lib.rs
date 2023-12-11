@@ -133,7 +133,6 @@ fn calculate_type(most_matches: u32, second_most_matches: u32) -> u32 {
 #[cfg(test)]
 mod tests {
     use crate::*;
-
     #[test]
     fn part_1_test() {
         assert_eq!(part_1(_TEST), Solution::Usize(6440))

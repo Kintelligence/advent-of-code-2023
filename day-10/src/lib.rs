@@ -1,6 +1,6 @@
 use map::{parse, Connection, Connection::*};
 use shared::{
-    point_vec2d::{Direction, Direction::*, Point, PointVec2d, DIRECTIONS},
+    point_vec2d::{Direction, Point, PointVec2d, DIRECTIONS},
     *,
 };
 
