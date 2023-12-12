@@ -1,3 +1,4 @@
+use rayon::iter::{ParallelBridge, ParallelIterator};
 use std::collections::HashMap;
 
 use shared::{parse::Parsable, *};
@@ -8,7 +9,8 @@ pub const _INPUT: &'static str = include_str!("_input.txt");
 pub fn part_1(_input: &str) -> Solution {
     _input
         .lines()
-        .map(|line| count_permutations(&parse_line(line), 0, 0, 0, &mut HashMap::new()))
+        .par_bridge()
+        .map(|line| memoized_count(&parse_line(line), 0, 0, 0, &mut HashMap::new()))
         .sum::<usize>()
         .into()
 }
@@ -49,9 +51,8 @@ mod part_1_tests {
 pub fn part_2(_input: &str) -> Solution {
     _input
         .lines()
-        .map(|line| {
-            count_permutations(&unfold_row(&parse_line(line)), 0, 0, 0, &mut HashMap::new())
-        })
+        .par_bridge()
+        .map(|line| memoized_count(&unfold_row(&parse_line(line)), 0, 0, 0, &mut HashMap::new()))
         .sum::<usize>()
         .into()
 }
@@ -77,7 +78,6 @@ mod part_2_tests {
     }
 
     #[test]
-    #[ignore = "todo"]
     fn example_input() {
         let input = "???.### 1,1,3
 .??..??...?##. 1,1,3
@@ -90,13 +90,12 @@ mod part_2_tests {
     }
 
     #[test]
-    #[ignore = "reason"]
     fn real_input() {
         assert_eq!(part_2(_INPUT), Solution::Usize(527570479489));
     }
 }
 
-fn count_permutations(
+fn memoized_count(
     row: &Row,
     spring_index: usize,
     count_index: usize,
@@ -106,7 +105,18 @@ fn count_permutations(
     if let Some(memo) = memoization.get(&(spring_index, count_index, current_count)) {
         return *memo;
     }
+    let value = count_permutations(row, spring_index, count_index, current_count, memoization);
+    memoization.insert((spring_index, count_index, current_count), value);
+    value
+}
 
+fn count_permutations(
+    row: &Row,
+    spring_index: usize,
+    count_index: usize,
+    current_count: usize,
+    memoization: &mut HashMap<(usize, usize, usize), usize>,
+) -> usize {
     let mut current_count = current_count;
     let mut spring_index = spring_index;
     let mut count_index = count_index;
@@ -116,11 +126,9 @@ fn count_permutations(
             if (count_index > row.counts.len() - 1 && current_count == 0)
                 || (count_index == row.counts.len() - 1 && current_count == row.counts[count_index])
             {
-                memoization.insert((spring_index, count_index, current_count), 1);
                 return 1;
             }
 
-            memoization.insert((spring_index, count_index, current_count), 0);
             return 0;
         }
 
@@ -128,12 +136,10 @@ fn count_permutations(
             Condition::Unknown => break,
             Condition::Operational => {
                 if count_index > row.counts.len() - 1 {
-                    memoization.insert((spring_index, count_index, current_count), 0);
                     return 0;
                 }
 
                 if current_count == row.counts[count_index] {
-                    memoization.insert((spring_index, count_index, current_count), 0);
                     return 0;
                 }
 
@@ -148,7 +154,6 @@ fn count_permutations(
                     current_count = 0;
                     count_index += 1;
                 } else {
-                    memoization.insert((spring_index, count_index, current_count), 0);
                     return 0;
                 }
             }
@@ -159,17 +164,17 @@ fn count_permutations(
 
     if current_count == 0 {
         if count_index < row.counts.len() {
-            sum += count_permutations(row, spring_index + 1, count_index, 1, memoization)
-                + count_permutations(row, spring_index + 1, count_index, 0, memoization);
+            sum += memoized_count(row, spring_index + 1, count_index, 1, memoization)
+                + memoized_count(row, spring_index + 1, count_index, 0, memoization);
         } else {
-            sum += count_permutations(row, spring_index + 1, count_index, 0, memoization);
+            sum += memoized_count(row, spring_index + 1, count_index, 0, memoization);
         }
     } else if count_index > row.counts.len() - 1 {
         sum += 0;
     } else if current_count == row.counts[count_index] {
-        sum += count_permutations(row, spring_index + 1, count_index + 1, 0, memoization);
+        sum += memoized_count(row, spring_index + 1, count_index + 1, 0, memoization);
     } else {
-        sum += count_permutations(
+        sum += memoized_count(
             row,
             spring_index + 1,
             count_index,
@@ -178,7 +183,6 @@ fn count_permutations(
         );
     }
 
-    memoization.insert((spring_index, count_index, current_count), sum);
     return sum;
 }
 

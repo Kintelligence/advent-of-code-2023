@@ -288,6 +288,7 @@ dependencies = [
 name = "day-12"
 version = "0.1.0"
 dependencies = [
+ "rayon",
  "shared",
  "test-case",
 ]
