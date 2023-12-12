@@ -78,6 +78,8 @@ macro_rules! parsable_negative_number {
 parsable_number!(u32);
 parsable_number!(u64);
 parsable_number!(u128);
+parsable_number!(usize);
 parsable_negative_number!(i32);
 parsable_negative_number!(i64);
 parsable_negative_number!(i128);
+parsable_negative_number!(isize);
