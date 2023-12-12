@@ -1,5 +1,6 @@
 use rayon::iter::{ParallelBridge, ParallelIterator};
 use std::collections::HashMap;
+use Condition::*;
 
 use shared::{parse::Parsable, *};
 extern crate shared;
@@ -10,7 +11,7 @@ pub fn part_1(_input: &str) -> Solution {
     _input
         .lines()
         .par_bridge()
-        .map(|line| memoized_count(&parse_line(line), 0, 0, 0, &mut HashMap::new()))
+        .map(|line| memoized_count(&parse_line(line), 0, 0, &mut HashMap::new()))
         .sum::<usize>()
         .into()
 }
@@ -52,7 +53,7 @@ pub fn part_2(_input: &str) -> Solution {
     _input
         .lines()
         .par_bridge()
-        .map(|line| memoized_count(&unfold_row(&parse_line(line)), 0, 0, 0, &mut HashMap::new()))
+        .map(|line| memoized_count(&unfold_row(&parse_line(line)), 0, 0, &mut HashMap::new()))
         .sum::<usize>()
         .into()
 }
@@ -99,14 +100,13 @@ fn memoized_count(
     row: &Row,
     spring_index: usize,
     count_index: usize,
-    current_count: usize,
-    memoization: &mut HashMap<(usize, usize, usize), usize>,
+    memoization: &mut HashMap<(usize, usize), usize>,
 ) -> usize {
-    if let Some(memo) = memoization.get(&(spring_index, count_index, current_count)) {
+    if let Some(memo) = memoization.get(&(spring_index, count_index)) {
         return *memo;
     }
-    let value = count_permutations(row, spring_index, count_index, current_count, memoization);
-    memoization.insert((spring_index, count_index, current_count), value);
+    let value = count_permutations(row, spring_index, count_index, memoization);
+    memoization.insert((spring_index, count_index), value);
     value
 }
 
@@ -114,76 +114,68 @@ fn count_permutations(
     row: &Row,
     spring_index: usize,
     count_index: usize,
-    current_count: usize,
-    memoization: &mut HashMap<(usize, usize, usize), usize>,
+    memoization: &mut HashMap<(usize, usize), usize>,
 ) -> usize {
-    let mut current_count = current_count;
-    let mut spring_index = spring_index;
-    let mut count_index = count_index;
-
-    loop {
-        if spring_index >= row.springs.len() {
-            if (count_index > row.counts.len() - 1 && current_count == 0)
-                || (count_index == row.counts.len() - 1 && current_count == row.counts[count_index])
-            {
-                return 1;
-            }
-
-            return 0;
-        }
-
-        match row.springs[spring_index] {
-            Condition::Unknown => break,
-            Condition::Operational => {
-                if count_index > row.counts.len() - 1 {
-                    return 0;
-                }
-
-                if current_count == row.counts[count_index] {
-                    return 0;
-                }
-
-                current_count += 1;
-                spring_index += 1;
-            }
-            Condition::Damaged => {
-                if current_count == 0 {
-                    spring_index += 1;
-                } else if current_count == row.counts[count_index] {
-                    spring_index += 1;
-                    current_count = 0;
-                    count_index += 1;
-                } else {
-                    return 0;
-                }
-            }
-        }
-    }
+    let window = row.counts[count_index];
+    let next_window = row.counts.get(count_index + 1);
 
     let mut sum = 0;
 
-    if current_count == 0 {
-        if count_index < row.counts.len() {
-            sum += memoized_count(row, spring_index + 1, count_index, 1, memoization)
-                + memoized_count(row, spring_index + 1, count_index, 0, memoization);
-        } else {
-            sum += memoized_count(row, spring_index + 1, count_index, 0, memoization);
-        }
-    } else if count_index > row.counts.len() - 1 {
-        sum += 0;
-    } else if current_count == row.counts[count_index] {
-        sum += memoized_count(row, spring_index + 1, count_index + 1, 0, memoization);
-    } else {
-        sum += memoized_count(
-            row,
-            spring_index + 1,
-            count_index,
-            current_count + 1,
-            memoization,
-        );
-    }
+    for (start, springs) in row.springs[spring_index..].windows(window).enumerate() {
+        let window_start = start + spring_index;
+        let window_end = window_start + window - 1;
 
-    return sum;
+        if window_start > 0 && row.springs[window_start - 1] == Operational {
+            break;
+        }
+
+        if window_end + 1 <= row.springs.len() - 1 && row.springs[window_end + 1] == Operational {
+            continue;
+        }
+
+        if springs.iter().any(|spring| *spring == Damaged) {
+            continue;
+        }
+
+        if let Some(next) = next_window {
+            if window_end + 1 + next - 1 > row.springs.len() - 1 {
+                break;
+            }
+
+            let mut count = 0;
+            let mut pot = 0;
+            for (offset, spring) in row.springs[window_end + 2..].iter().enumerate() {
+                match spring {
+                    Damaged => {
+                        if count != 0 {
+                            break;
+                        }
+                        continue;
+                    }
+                    Operational => {
+                        count += 1;
+                        pot += 1;
+                    }
+                    Unknown => pot += 1,
+                }
+
+                if pot >= *next {
+                    let next_start = window_end + 2 + offset - (next - 1);
+
+                    sum += memoized_count(row, next_start, count_index + 1, memoization);
+                    break;
+                }
+            }
+        } else {
+            if !row.springs[window_end + 1..]
+                .iter()
+                .any(|spring| *spring == Operational)
+            {
+                sum += 1;
+            }
+        }
+    }
+    sum
 }
 
 struct Row {
@@ -191,7 +183,7 @@ struct Row {
     counts: Vec<usize>,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 enum Condition {
     Unknown,
     Operational,
@@ -205,7 +197,7 @@ fn unfold_row(row: &Row) -> Row {
     };
 
     for _ in 0..4 {
-        unfolded.springs.push(Condition::Unknown);
+        unfolded.springs.push(Unknown);
         unfolded.springs.append(&mut row.springs.clone());
         unfolded.counts.append(&mut row.counts.clone());
     }
@@ -219,9 +211,9 @@ fn parse_line(line: &str) -> Row {
     let mut springs: Vec<Condition> = Vec::new();
     while let Some(byte) = bytes.next() {
         match byte {
-            b'#' => springs.push(Condition::Operational),
-            b'.' => springs.push(Condition::Damaged),
-            b'?' => springs.push(Condition::Unknown),
+            b'#' => springs.push(Operational),
+            b'.' => springs.push(Damaged),
+            b'?' => springs.push(Unknown),
             _ => {
                 break;
             }
