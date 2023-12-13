@@ -6,15 +6,7 @@ pub const _INPUT: &'static str = include_str!("_input.txt");
 pub fn part_1(_input: &str) -> Solution {
     _input
         .split("\n\n")
-        .enumerate()
-        .map(|(i, map)| {
-            let m = Map::parse(map);
-            let r = solve(&m);
-            if r == 0 {
-                println!("Failed at {}", i);
-            }
-            r
-        })
+        .map(|map| solve(&Map::parse(map), false))
         .sum::<usize>()
         .into()
 }
@@ -22,15 +14,7 @@ pub fn part_1(_input: &str) -> Solution {
 pub fn part_2(_input: &str) -> Solution {
     _input
         .split("\n\n")
-        .enumerate()
-        .map(|(i, map)| {
-            let m = Map::parse(map);
-            let r = solve_smudged(&m);
-            if r == 0 {
-                println!("Failed at {}", i);
-            }
-            r
-        })
+        .map(|map| solve(&Map::parse(map), true))
         .sum::<usize>()
         .into()
 }
@@ -41,24 +25,32 @@ struct Map {
     columns: Vec<u16>,
 }
 
-fn solve(map: &Map) -> usize {
-    if let Some(result) = find_mirror(&map.rows) {
-        return result * 100;
+fn solve(map: &Map, is_smudged: bool) -> usize {
+    if let Some(result) = find_mirror(&map.columns, is_smudged) {
+        return result;
     }
 
-    if let Some(result) = find_mirror(&map.columns) {
-        return result;
+    if let Some(result) = find_mirror(&map.rows, is_smudged) {
+        return result * 100;
     }
 
     0
 }
 
-fn find_mirror(lines: &Vec<u16>) -> Option<usize> {
+fn find_mirror(lines: &Vec<u16>, is_smudged: bool) -> Option<usize> {
     let count = lines.len();
 
-    for i in 1..count {
-        if is_mirror(&lines[0..i], &lines[i..]) {
-            return Some(i);
+    if is_smudged {
+        for i in 1..count {
+            if is_smudged_mirror(&lines[0..i], &lines[i..]) {
+                return Some(i);
+            }
+        }
+    } else {
+        for i in 1..count {
+            if is_mirror(&lines[0..i], &lines[i..]) {
+                return Some(i);
+            }
         }
     }
 
@@ -84,30 +76,6 @@ fn is_mirror(left: &[u16], right: &[u16]) -> bool {
     }
 
     true
-}
-
-fn solve_smudged(map: &Map) -> usize {
-    if let Some(result) = find_smudged_mirror(&map.rows) {
-        return result * 100;
-    }
-
-    if let Some(result) = find_smudged_mirror(&map.columns) {
-        return result;
-    }
-
-    0
-}
-
-fn find_smudged_mirror(lines: &Vec<u16>) -> Option<usize> {
-    let count = lines.len();
-
-    for i in 1..count {
-        if is_smudged_mirror(&lines[0..i], &lines[i..]) {
-            return Some(i);
-        }
-    }
-
-    None
 }
 
 fn is_smudged_mirror(left: &[u16], right: &[u16]) -> bool {
@@ -213,6 +181,13 @@ mod part_2_tests {
         assert_eq!(part_2(_INPUT), Solution::Usize(0));
     }
 
+    #[test_case("##.....##
+###.#..##
+###..##..
+...##.###
+..#.#.#..
+#####..##
+.#....#..", 1; "real 3")]
     #[test_case("#.##..##.
 ..#.##.#.
 ##......#
