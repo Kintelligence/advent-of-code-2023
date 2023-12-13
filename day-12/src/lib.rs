@@ -69,12 +69,12 @@ mod part_2_tests {
     #[test_case("????.######..#####. 1,6,5", 2500; "Line 5")]
     #[test_case("?###???????? 3,2,1", 506250; "Line 6")]
     #[test_case("?#?##????#??.#?# 5,4,1,1", 3125; "Line 15")]
-    fn example_input_lines(input: &str, count: usize) {
+    fn _example_input_lines(input: &str, count: usize) {
         assert_eq!(part_2(input), Solution::Usize(count));
     }
 
     #[test_case("..?.????#?????????? 1,1,1,1,1,4", 3916284121; "Line 16")]
-    fn problem_input_lines(input: &str, count: usize) {
+    fn _problem_input_lines(input: &str, count: usize) {
         assert_eq!(part_2(input), Solution::Usize(count));
     }
 
