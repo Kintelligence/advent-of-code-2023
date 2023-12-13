@@ -97,14 +97,13 @@ fn is_smudged_mirror(left: &[u16], right: &[u16]) -> bool {
 impl Map {
     fn parse(input: &str) -> Self {
         let width = input.lines().next().unwrap().len();
+        let height = input.lines().count();
 
-        let mut rows = Vec::new();
+        let mut rows = vec![0; height];
         let mut columns = vec![0; width];
         let mut bytes = input.bytes();
 
         let (mut x, mut y) = (0, 0);
-
-        rows.push(0);
         while let Some(byte) = bytes.next() {
             match byte {
                 b'.' => x += 1,
@@ -116,7 +115,6 @@ impl Map {
                 b'\n' => {
                     x = 0;
                     y += 1;
-                    rows.push(0);
                 }
                 _ => {}
             }
