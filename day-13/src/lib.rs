@@ -61,14 +61,10 @@ fn is_mirror(left: &[u16], right: &[u16]) -> bool {
     let mut l = left.iter().rev();
     let mut r = right.iter();
 
-    loop {
-        if let Some(a) = l.next() {
-            if let Some(b) = r.next() {
-                if a != b {
-                    return false;
-                }
-            } else {
-                break;
+    while let Some(a) = l.next() {
+        if let Some(b) = r.next() {
+            if a != b {
+                return false;
             }
         } else {
             break;
@@ -84,15 +80,11 @@ fn is_smudged_mirror(left: &[u16], right: &[u16]) -> bool {
 
     let mut smudges = 0;
 
-    loop {
-        if let Some(a) = l.next() {
-            if let Some(b) = r.next() {
-                smudges += (a ^ b).count_ones();
-                if smudges > 1 {
-                    return false;
-                }
-            } else {
-                break;
+    while let Some(a) = l.next() {
+        if let Some(b) = r.next() {
+            smudges += (a ^ b).count_ones();
+            if smudges > 1 {
+                return false;
             }
         } else {
             break;
