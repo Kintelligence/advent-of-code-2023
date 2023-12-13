@@ -94,19 +94,30 @@ mod part_2_tests {
     fn real_input() {
         assert_eq!(part_2(_INPUT), Solution::Usize(527570479489));
     }
+
+    #[test]
+    fn verify_input() {
+        let rows: Vec<Row> = _INPUT.lines().map(|line| parse_line(line)).collect();
+        let counts = rows.iter().map(|r| r.counts.len()).max().unwrap();
+        let springs = rows.iter().map(|r| r.springs.len()).max().unwrap();
+
+        println!("{} {}", counts, springs);
+    }
 }
 
 fn memoized_count(
     row: &Row,
     spring_index: usize,
     count_index: usize,
-    memoization: &mut HashMap<(usize, usize), usize>,
+    memoization: &mut HashMap<u16, usize>,
 ) -> usize {
-    if let Some(memo) = memoization.get(&(spring_index, count_index)) {
+    let key = (spring_index as u16) | (count_index as u16) << 8;
+
+    if let Some(memo) = memoization.get(&key) {
         return *memo;
     }
     let value = count_permutations(row, spring_index, count_index, memoization);
-    memoization.insert((spring_index, count_index), value);
+    memoization.insert(key, value);
     value
 }
 
@@ -114,7 +125,7 @@ fn count_permutations(
     row: &Row,
     spring_index: usize,
     count_index: usize,
-    memoization: &mut HashMap<(usize, usize), usize>,
+    memoization: &mut HashMap<u16, usize>,
 ) -> usize {
     let window = row.counts[count_index];
     let next_window = row.counts.get(count_index + 1);
