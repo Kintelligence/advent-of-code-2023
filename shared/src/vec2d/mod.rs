@@ -112,10 +112,10 @@ impl<T: std::fmt::Debug> std::fmt::Display for Vec2d<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut str = String::new();
         for i in 0..self.height {
-            if i != 0 {
+            str.push_str(&format!("{:?}", &self.row(i)));
+            if i != self.height - 1 {
                 str.push_str(", ");
             }
-            str.push_str(&format!("{:?}", &self.row(i)));
             str.push('\n');
         }
         write!(f, "{}", str)
