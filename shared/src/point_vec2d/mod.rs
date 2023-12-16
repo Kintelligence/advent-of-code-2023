@@ -33,6 +33,7 @@ pub enum Direction {
     West,
 }
 
+#[derive(Clone)]
 pub struct PointVec2d<T> {
     pub vec: Vec<T>,
     pub width: usize,
