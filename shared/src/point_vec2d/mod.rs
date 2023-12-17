@@ -1,6 +1,6 @@
 use core::fmt;
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, PartialOrd, Ord)]
 pub struct Point {
     pub x: usize,
     pub y: usize,
@@ -25,7 +25,7 @@ pub const DIRECTIONS: [Direction; 4] = [
     Direction::West,
 ];
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Direction {
     North,
     East,
