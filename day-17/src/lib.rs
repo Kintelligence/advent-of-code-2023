@@ -38,14 +38,21 @@ fn solve(map: &PointVec2d<u8>, min: usize, max: usize) -> Solution {
             };
 
             cost += map[current] as usize;
+            let heurestic = map.height - 1 + map.width - 1 - current.x - current.y;
+
             heap.push(Path {
                 cost,
+                estimate: cost + heurestic,
                 state: State { current, direction },
             })
         }
     }
 
-    let mut visited: HashMap<State, usize> = HashMap::new();
+    let v = vec![usize::MAX; map.width * map.height];
+    let mut visited = [
+        PointVec2d::from_vec(v.clone(), map.height),
+        PointVec2d::from_vec(v, map.height),
+    ];
 
     while let Some(path) = heap.pop() {
         if path.state.current.x == map.width - 1 && path.state.current.y == map.height - 1 {
@@ -53,13 +60,15 @@ fn solve(map: &PointVec2d<u8>, min: usize, max: usize) -> Solution {
         }
 
         for next in path.next_paths(&map, min, max) {
-            if let Some(last_cost) = visited.get(&next.state) {
-                if *last_cost > next.cost {
-                    visited.insert(next.state, next.cost);
-                    heap.push(next);
-                }
+            let d = if next.state.direction == Direction::South {
+                0
             } else {
-                visited.insert(next.state, next.cost);
+                1
+            };
+
+            let last_cost = visited[d][next.state.current];
+            if last_cost > next.cost {
+                visited[d][next.state.current] = next.cost;
                 heap.push(next);
             }
         }
@@ -72,6 +81,7 @@ fn solve(map: &PointVec2d<u8>, min: usize, max: usize) -> Solution {
 struct Path {
     state: State,
     cost: usize,
+    estimate: usize,
 }
 
 impl Path {
@@ -85,9 +95,7 @@ impl Path {
             let mut current = self.state.current;
             let mut direction: Direction;
             for _ in 1..min {
-                if self.state.direction == Direction::North
-                    || self.state.direction == Direction::South
-                {
+                if self.state.direction == Direction::South {
                     if let Some(next) = map.go(current, d[0]) {
                         current = next;
                     } else {
@@ -104,18 +112,16 @@ impl Path {
             }
 
             for _ in min..=max {
-                if self.state.direction == Direction::North
-                    || self.state.direction == Direction::South
-                {
+                if self.state.direction == Direction::South {
                     if let Some(next) = map.go(current, d[0]) {
-                        direction = d[0];
+                        direction = Direction::East;
                         current = next;
                     } else {
                         break;
                     }
                 } else {
                     if let Some(next) = map.go(current, d[1]) {
-                        direction = d[1];
+                        direction = Direction::South;
                         current = next;
                     } else {
                         break;
@@ -123,8 +129,10 @@ impl Path {
                 }
 
                 cost += map[current] as usize;
+                let heurestic = map.height - 1 + map.width - 1 - current.x - current.y;
                 vec.push(Path {
                     cost,
+                    estimate: cost + heurestic,
                     state: State { current, direction },
                 })
             }
@@ -135,13 +143,13 @@ impl Path {
 
 impl Ord for Path {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        other.cost.cmp(&self.cost)
+        other.estimate.cmp(&self.estimate)
     }
 }
 
 impl PartialOrd for Path {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        other.cost.partial_cmp(&self.cost)
+        other.estimate.partial_cmp(&self.estimate)
     }
 }
 
