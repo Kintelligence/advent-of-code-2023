@@ -137,6 +137,7 @@ pub fn day_name(day: u32) -> &'static str {
         17 => "Clumsy Crucible",
         18 => "Lavaduct Lagoon",
         19 => "Aplenty",
+        20 => "Pulse Propagation",
         _ => "Unnamed",
     }
 }
