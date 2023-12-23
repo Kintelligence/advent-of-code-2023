@@ -19,15 +19,17 @@ fn solve(map: &PointVec2d<Tile>, start: Point, steps: usize) -> usize {
     let mut queue = VecDeque::new();
     queue.push_back((start, 0));
 
+    let parity = steps % 2;
+
     let mut result: usize = 0;
 
     while let Some((node, i)) = queue.pop_front() {
         if visited[node] == 0 {
-            if i % 2 == 0 {
+            if i % 2 == parity {
                 result += 1;
             }
             visited[node] = 1;
-            if i <= steps {
+            if i < steps {
                 for neighbour in map.neighbours(node) {
                     if let Tile::Empty = map[neighbour] {
                         if visited[neighbour] == 0 {
@@ -40,7 +42,7 @@ fn solve(map: &PointVec2d<Tile>, start: Point, steps: usize) -> usize {
     }
 
     println!("From {} for {}", start, steps);
-    println!("{}", visited);
+    //println!("{}", visited);
 
     result
 }
@@ -50,9 +52,9 @@ pub fn part_2(_input: &str) -> Solution {
     let size = map.width;
     let full = size - 1;
     let half = full / 2;
-    let n = (26501365 - 65) / size;
+    let n = (26501365 - half) / size;
 
-    println!("{} {} {}", size, full, half);
+    //println!("{} {} {}", size, full, half);
 
     let mut result: usize = 0;
     result += (extrapolate_squares(n as f64) as usize) * solve(&map, start, 200);
@@ -63,7 +65,7 @@ pub fn part_2(_input: &str) -> Solution {
         Point::new(0, full),
         Point::new(full, full),
     ] {
-        result += (n - 1) * solve(&map, point, half + full - 1);
+        result += (n - 1) * solve(&map, point, half + full);
         result += n * solve(&map, point, half - 1);
     }
 
@@ -73,12 +75,14 @@ pub fn part_2(_input: &str) -> Solution {
         Point::new(half, 0),
         Point::new(half, full),
     ] {
-        result += (n - 1) * solve(&map, point, full - 1);
+        result += solve(&map, point, full);
     }
 
     result.into()
 }
-
+//532 053 855 213
+//532 053 855 213
+//532 023 510 213
 fn extrapolate_squares(x: f64) -> f64 {
     let f = vec![(1.0, 1.0), (2.0, 5.0), (3.0, 13.0)];
     let n = f.len();
@@ -178,7 +182,7 @@ mod tests {
         assert_eq!(solve(&map, start, steps), expected.into());
     }
 
-    #[test_case(_INPUT, 626164796312645)]
+    #[test_case(_INPUT, 625628021226274)]
     fn part_2_test(input: &str, expected: usize) {
         assert_eq!(part_2(input), expected.into());
     }
@@ -190,7 +194,7 @@ mod tests {
 
     #[test_case(_INPUT, Point::new(0, 130), 64)]
     #[test_case(_INPUT, Point::new(0, 130), 195)]
-    #[test_case(_INPUT, Point::new(0, 64), 129)]
+    #[test_case(_INPUT, Point::new(0, 65), 130)]
     #[test_case(_INPUT, Point::new(0, 0), 64)]
     fn print(input: &str, start: Point, steps: usize) {
         let (map, _) = parse(input);
