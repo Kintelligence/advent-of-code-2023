@@ -80,9 +80,7 @@ pub fn part_2(_input: &str) -> Solution {
 
     result.into()
 }
-//532 053 855 213
-//532 053 855 213
-//532 023 510 213
+
 fn extrapolate_squares(x: f64) -> f64 {
     let f = vec![(1.0, 1.0), (2.0, 5.0), (3.0, 13.0)];
     let n = f.len();
