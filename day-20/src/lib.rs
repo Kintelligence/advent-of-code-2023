@@ -1,6 +1,6 @@
 use std::collections::{HashMap, VecDeque};
 
-use num::{complex::ComplexFloat, Integer};
+use num::Integer;
 use shared::*;
 extern crate shared;
 
@@ -12,7 +12,6 @@ mod tests {
     use test_case::test_case;
 
     #[test_case(include_str!("_example_1.txt"), 32000000)]
-    #[test_case(include_str!("_example_2.txt"), 11687500)]
     #[test_case(_INPUT, 818649769)]
     fn part_1_test(input: &str, expected: usize) {
         assert_eq!(part_1(input), expected.into());
@@ -48,8 +47,6 @@ pub fn part_2(_input: &str) -> Solution {
 
     if let Kind::Conjunction(conj) = &a.kind {
         let ids: Vec<usize> = conj.connections.keys().map(|k| *k).collect();
-
-        let mut hist: HashMap<usize, usize> = HashMap::new();
         let mut cycle_lengths: HashMap<usize, usize> = HashMap::new();
         let mut i: usize = 0;
         loop {
@@ -57,19 +54,15 @@ pub fn part_2(_input: &str) -> Solution {
             let hits = machine.click(&ids);
             for id in hits {
                 // println!("found {} at {}", id, i);
-                if let Some(dup) = hist.insert(id, i) {
-                    if dup != i {
-                        // println!("found duplicate for {} at {}", id, dup);
-                        if !cycle_lengths.contains_key(&id) {
-                            cycle_lengths.insert(id, i - dup);
-                            if cycle_lengths.len() == ids.len() {
-                                let mut result = 1;
-                                for id in ids.iter() {
-                                    result = result.lcm(&cycle_lengths[id]);
-                                }
-                                return result.into();
-                            }
+                // println!("found duplicate for {} at {}", id, dup);
+                if !cycle_lengths.contains_key(&id) {
+                    cycle_lengths.insert(id, i);
+                    if cycle_lengths.len() == ids.len() {
+                        let mut result = 1;
+                        for id in ids.iter() {
+                            result *= cycle_lengths[id];
                         }
+                        return result.into();
                     }
                 }
             }

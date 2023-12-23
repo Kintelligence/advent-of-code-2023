@@ -20,7 +20,6 @@ fn solve(map: &PointVec2d<Tile>, start: Point, steps: usize) -> usize {
     queue.push_back((start, 0));
 
     let parity = steps % 2;
-
     let mut result: usize = 0;
 
     while let Some((node, i)) = queue.pop_front() {
@@ -41,9 +40,6 @@ fn solve(map: &PointVec2d<Tile>, start: Point, steps: usize) -> usize {
         }
     }
 
-    println!("From {} for {}", start, steps);
-    //println!("{}", visited);
-
     result
 }
 
@@ -54,10 +50,20 @@ pub fn part_2(_input: &str) -> Solution {
     let half = full / 2;
     let n = (26501365 - half) / size;
 
-    //println!("{} {} {}", size, full, half);
+    let reg: usize;
+    let off: usize;
+    if n % 2 == 1 {
+        reg = n * n;
+        off = (n - 1) * (n - 1);
+    } else {
+        reg = (n - 1) * (n - 1);
+        off = n * n;
+    }
 
     let mut result: usize = 0;
-    result += (extrapolate_squares(n as f64) as usize) * solve(&map, start, 200);
+    // We go 201 steps for the regular squares so the parity fits
+    result += reg * solve(&map, start, 201);
+    result += off * solve(&map, start, 200);
 
     for point in [
         Point::new(0, 0),
@@ -79,23 +85,6 @@ pub fn part_2(_input: &str) -> Solution {
     }
 
     result.into()
-}
-
-fn extrapolate_squares(x: f64) -> f64 {
-    let f = vec![(1.0, 1.0), (2.0, 5.0), (3.0, 13.0)];
-    let n = f.len();
-    let mut result = 0.0;
-    for i in 0..n {
-        let mut term = f[i].1;
-        for j in 0..n {
-            if i != j {
-                term *= (x - f[j].0) / (f[i].0 - f[j].0);
-            }
-        }
-        result += term;
-    }
-
-    result
 }
 
 fn parse(input: &str) -> (PointVec2d<Tile>, Point) {
@@ -132,40 +121,10 @@ fn parse(input: &str) -> (PointVec2d<Tile>, Point) {
     (PointVec2d::from_vec(vec, height), start)
 }
 
-fn parse_big(input: &str) -> (PointVec2d<Tile>, Point) {
-    let (map, _) = parse(input);
-
-    let mut vec = Vec::new();
-    for y in 0..map.height {
-        for _ in 0..5 {
-            vec.append(&mut map.row(y).iter().map(|t| *t).collect());
-        }
-    }
-
-    let mut map_vec = Vec::new();
-    for _ in 0..5 {
-        map_vec.append(&mut vec.clone());
-    }
-
-    let height = map.height * 5;
-    let start = Point::new(height / 2, height / 2);
-
-    (PointVec2d::from_vec(map_vec, height), start)
-}
-
 #[derive(Clone, Copy)]
 enum Tile {
     Empty,
     Rock,
-}
-
-impl std::fmt::Debug for Tile {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::Empty => write!(f, "."),
-            Self::Rock => write!(f, "#"),
-        }
-    }
 }
 
 #[cfg(test)]
@@ -183,19 +142,5 @@ mod tests {
     #[test_case(_INPUT, 625628021226274)]
     fn part_2_test(input: &str, expected: usize) {
         assert_eq!(part_2(input), expected.into());
-    }
-
-    #[test_case(4.0, 25.0)]
-    fn extrapolate_squares_tests(x: f64, expected: f64) {
-        assert_eq!(extrapolate_squares(x), expected);
-    }
-
-    #[test_case(_INPUT, Point::new(0, 130), 64)]
-    #[test_case(_INPUT, Point::new(0, 130), 195)]
-    #[test_case(_INPUT, Point::new(0, 65), 130)]
-    #[test_case(_INPUT, Point::new(0, 0), 64)]
-    fn print(input: &str, start: Point, steps: usize) {
-        let (map, _) = parse(input);
-        solve(&map, start, steps);
     }
 }

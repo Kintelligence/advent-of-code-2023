@@ -81,7 +81,7 @@ pub fn part_2(_input: &str) -> Solution {
         let mut v = remove_layer(&bricks, vec![i]);
         v.sort_unstable();
         v.dedup();
-        println!("{}", v.len());
+
         result += v.len();
     }
 
