@@ -1,6 +1,6 @@
 use core::fmt;
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug, PartialOrd, Ord)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, PartialOrd, Ord, Hash)]
 pub struct Point {
     pub x: usize,
     pub y: usize,
@@ -126,6 +126,16 @@ impl<T> PointVec2d<T> {
         }
     }
 
+    pub fn neighbours_directional(&self, point: Point) -> NeighboursDirectional {
+        NeighboursDirectional {
+            x: point.x,
+            y: point.y,
+            height: self.height,
+            width: self.width,
+            current: 0,
+        }
+    }
+
     pub fn diagonals(&self, point: Point) -> Diagonals {
         Diagonals {
             x: point.x,
@@ -236,6 +246,44 @@ impl Iterator for Neighbours {
             }
 
             return Some(Point::new(nx as usize, ny as usize));
+        }
+    }
+}
+
+pub struct NeighboursDirectional {
+    x: usize,
+    y: usize,
+    height: usize,
+    width: usize,
+    current: usize,
+}
+
+impl Iterator for NeighboursDirectional {
+    type Item = (Point, Direction);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            if self.current > 3 {
+                return None;
+            }
+
+            let nx = self.x as isize + ADJ_FOUR[self.current].0;
+            let ny = self.y as isize + ADJ_FOUR[self.current].1;
+            let dir = match self.current {
+                0 => Direction::West,
+                1 => Direction::North,
+                2 => Direction::South,
+                3 => Direction::East,
+                _ => panic!(),
+            };
+
+            self.current += 1;
+
+            if nx < 0 || nx >= self.width as isize || ny < 0 || ny >= self.height as isize {
+                continue;
+            }
+
+            return Some((Point::new(nx as usize, ny as usize), dir));
         }
     }
 }
